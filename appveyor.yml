@@ -3,21 +3,35 @@ environment:
   matrix:
   - job_name: Documentation
     job_group: Build
-    appveyor_build_worker_image: Ubuntu
-  
+    
   - job_name: libffi-ARM64
-    appveyor_build_worker_image: Visual Studio 2019
   
   - job_name: Build x64
     job_group: Build
-    appveyor_build_worker_image: Visual Studio 2019
   
   - job_name: Build ARM64
     job_group: Build
     job_depends_on: libffi-ARM64
-    appveyor_build_worker_image: Visual Studio 2019
     
   - job_name: Package
     job_depends_on: Build
     appveyor_build_worker_image: Visual Studio 2019
     pcbuild\build.bat -p ARM64 --no-tkinter
+
+for:
+  -
+   matrix:
+     only:
+       - job_name: Documentation
+       
+   build_script:
+     cd %APPVEYOR_BUILD_FOLDER%\Doc
+     sphinx-build -bhtmlhelp . build/htmlhelp
+  -
+   matrix:
+     only:
+       - job_name: libffi-ARM64
+       
+   build_script:
+     cd %APPVEYOR_BUILD_FOLDER%\Doc
+     sphinx-build -bhtmlhelp . build/htmlhelp
